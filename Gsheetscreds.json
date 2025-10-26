@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "smooth-helper-473800-a0",
+  "private_key_id": "321f1ce24448c11aeb0cc4ffe8b43b63971b44e9",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDCiPBAilJezq6X\ng1kegvoG45qwWIlCGOv3Zg+rUUScpTHxVGggH4laIMATsnmAGiGC3/6zjlQHqq4/\nIhdGY/qJ2jD0/ZVp44Rc5ttR2NG/3C/hAycnsHv4l/i0kEhdxEmw9Xh6fLeFzH7D\n24DM2R3ytaZ88MjIPqM3zoa/zDU7qnRKNtxQvq7GMcjEwOVvzyZ8Q4J7e66+4T1G\nFUgCl5S+Rj2GNw8l63T2bbiLYX7Rvg0x+M38ZBXt/o7Y2ZYULPVdngk3g2zZrwnw\nFWEDmRBjvAuRGnbNK2EXs98QkHq7tVZVsFLHpnEFViWhGAfnevx613qzdBA15Ntf\nJm8clKoPAgMBAAECggEAM4n6NO8woYOah/O5obbLrRWR/xSF0OgvZA07K4VNaz7s\n+2YEbDZOun0gxlcrj3/czwKvRTz5EErs/Tb3+aM1Vl5jSBUDB9nKUJ6tDoMmFvGs\nEa43KnG8doE02Am90nHVoDd4ouL18FHcZ+F4v0zqfUoZANL+LudBcOCbnKbql5K8\nD333DkQPKSRuaTslpCQ8LCxg3XQ5XtFsEcbHoabMxtneMolJ9jYVib0WlXefPqYe\nspGziG6+slbhD971G0sS+xFoA7bHg1Jc00Z5bXVAw/XASQNZn1GW8XjdV9lSk0aS\nAIEiLfLPpWxpDb6/zm8B+HEn42h+500ipCDg83Xv+QKBgQDlauN7cdWj8qyaCycJ\n09WJ9i7K268ztzzHEVjV5IErd6dIcXGV8qC3RzaVYvCJLpn7FdEBOyAi5j6fqx9d\nKKu4Qxpl273q1bJ3ipRneSoRejjF81Z/4SzE4D3jBHmpRvJeT+GiHlp9qJlu3wfn\ngFMxyAqHpPvzv6WOGqcNy01ztQKBgQDZE1eWTLFCbEJiUbio8dTGutOqjHuY/TEm\njlZtEZfQHtE/l2Ga4g1G5QlWdXnATeK/7nkCHIqZxNU/iX5oAjF0c0/EfIkkgfYN\nh2kbzopyHlzFkXHj3N02Eb+iL9GahqERfAXSkkCAImx/4OzSQc/HZ2Xeig/8BzHm\nf37RlohJMwKBgQCRfboKXWTZdlsTziLRzq/LsH54U93GdFxs+olWDHYGdPl3rcoV\nCCv4T4dEMdzNgupQG8PSfgahW1c3tzRKxjIwxw2Er1jABwoJWa9H98VAFDzQ/MNM\nkibsLDHTONFXExE90ncLcyh8LGIxt+uxWuZn2a8j2vOV32JEvo5W5ymVSQKBgQCC\nnnPmubEz4ca0OK5f4lyBVGwHRM8eiMPpil6Q9LQgBFsu451UwE7y6OCMiNXBFFyr\n1wgzcA8qZdlXiRlp5l/xzW0jMzimohj3nRJvLAH8ly6Fp3YbgYwOe/GO2y1JyVbk\nGXe7dEuhjpUxAZwfDIDFYP9YQEVMBtxM8UzTOrw5JwKBgQCJ/H6f63Kya176laKV\njgWVaxoRAZzneI6GEhcrqJVL6+vhoAD4yhJnGNJpTiq5iIAi6o1HsAkoyn7BP9YS\nmttuhDzb0RFTRB0bbntVzOC+oyLkCFYnLKcRAg2HnCgu5xbST5PWwLhfdmTrO5ew\nGSfLBb1l/rSi//L0jN1wQKnS3w==\n-----END PRIVATE KEY-----\n",
+  "client_email": "bootha-dashboard-reader@smooth-helper-473800-a0.iam.gserviceaccount.com",
+  "client_id": "113974030112194089955",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/bootha-dashboard-reader%40smooth-helper-473800-a0.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
