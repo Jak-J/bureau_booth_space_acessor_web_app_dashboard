@@ -1,0 +1,772 @@
+/* ============================================
+   BUREAU BOOTHS - MODERN LIGHT THEME SYSTEM
+   Professional Light Color Palette
+
+   HOW TO CUSTOMIZE COLORS:
+   1. Find the color variable you want to change below
+   2. Replace the hex code with your desired color
+   3. The change will apply throughout the entire application
+   4. Example: Change --accent-blue from #3b82f6 to #0066cc
+
+   COMMON COLOR CHANGES:
+   - Primary brand color: Change --accent-blue
+   - Success/positive: Change --accent-green
+   - Warning/alerts: Change --accent-orange or --accent-red
+   - Neutral/background: Change --bg-light or --bg-lighter
+   ============================================ */
+
+/* ============================================
+   1. COLOR PALETTE & VARIABLES
+   ============================================ */
+:root {
+    /* Primary Colors - Modern Light Theme */
+    --white: #ffffff;
+    --bg-light: #f8f9fa;           /* Main background color */
+    --bg-lighter: #f0f2f5;         /* Secondary background */
+    --bg-lightest: #e8eaed;        /* Tertiary background */
+
+    /* Accent Colors - Professional
+       CUSTOMIZE THESE TO MATCH YOUR BRAND */
+    --accent-blue: #3b82f6;        /* Primary accent - Change this for brand color */
+    --accent-blue-dark: #1e40af;   /* Darker blue for hover states */
+    --accent-blue-light: #dbeafe;  /* Lighter blue for backgrounds */
+    --accent-purple: #8b5cf6;      /* Secondary accent */
+    --accent-teal: #14b8a6;        /* Tertiary accent */
+    --accent-orange: #f97316;      /* Warning/attention color */
+    --accent-pink: #ec4899;        /* Highlight color */
+    --accent-green: #10b981;       /* Success/positive color */
+    --accent-red: #ef4444;         /* Error/critical color */
+
+    /* Text Colors - Hierarchy for readability */
+    --text-dark: #111827;          /* Primary text (headings, important) */
+    --text-medium: #4b5563;        /* Secondary text (body) */
+    --text-light: #9ca3af;         /* Tertiary text (hints, labels) */
+    --text-lighter: #d1d5db;       /* Disabled/placeholder text */
+    --text-white: #ffffff;         /* Text on dark backgrounds */
+
+    /* Border & Shadow - Depth and separation */
+    --border-light: #e5e7eb;       /* Primary border color */
+    --border-lighter: #f3f4f6;     /* Subtle border color */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);      /* Minimal shadow */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);      /* Small shadow */
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);      /* Medium shadow */
+    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);    /* Large shadow */
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);    /* Extra large shadow */
+
+    /* Z-Index Hierarchy - Controls layering of elements */
+    --z-navbar: 50;               /* Navigation bar */
+    --z-sidebar: 40;              /* Sidebar navigation */
+    --z-modal: 60;                /* Modal dialogs */
+    --z-dropdown: 45;             /* Dropdown menus */
+
+    /* Transitions - Animation timing */
+    --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);  /* Standard animation */
+    --transition-fast: 0.15s ease;                             /* Quick animation */
+    --transition-slower: 0.5s cubic-bezier(0.4, 0, 0.2, 1);   /* Slow animation */
+}
+
+/* ============================================
+   2. GLOBAL STYLES
+   ============================================ */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* ============================================
+   2.5 NAVBAR & SIDEBAR HIERARCHY
+   ============================================ */
+header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-navbar);
+    background: var(--white);
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+aside {
+    z-index: var(--z-sidebar);
+}
+
+main {
+    z-index: 10;
+}
+
+/* ============================================
+   3. TYPOGRAPHY CLASSES
+   ============================================ */
+.label-uppercase {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--text-medium);
+    text-transform: uppercase;
+}
+
+.value-large {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.value-medium {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.description-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-light);
+}
+
+.heading-h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.heading-h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+.heading-h2{display:flex;align-items:center;gap:12px;margin:0;}
+.heading-h2 img{width:50px;height:50px;object-fit:contain;display:block;}
+
+
+.heading-h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* ============================================
+   4. CARD & PANEL STYLING - MODERN LIGHT
+   ============================================ */
+.card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-xs);
+    transition: all var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-small {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-xs);
+    transition: all var(--transition-smooth);
+}
+
+.card-small:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-elevated {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border-lighter);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-smooth);
+}
+
+.card-elevated:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+/* Backward compatibility */
+.card-cream {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-xs);
+    transition: all var(--transition-smooth);
+}
+
+.card-cream:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-cream-small {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-xs);
+    transition: all var(--transition-smooth);
+}
+
+.card-cream-small:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Colored Left Borders */
+.border-blue {
+    border-left: 5px solid var(--accent-blue);
+}
+
+.border-orange {
+    border-left: 5px solid var(--accent-orange);
+}
+
+.border-pink {
+    border-left: 5px solid var(--accent-pink);
+}
+
+.border-green {
+    border-left: 5px solid var(--accent-green);
+}
+
+.border-red {
+    border-left: 5px solid #ef4444;
+}
+
+.border-gray {
+    border-left: 5px solid #9ca3af;
+}
+
+/* ============================================
+   5. HOVER EFFECTS
+   ============================================ */
+.hover-lift {
+    transition: all var(--transition-smooth);
+}
+
+.hover-lift:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-4px);
+}
+
+.hover-scale {
+    transition: transform var(--transition-smooth);
+}
+
+.hover-scale:hover {
+    transform: scale(1.02);
+}
+
+.hover-glow {
+    transition: all var(--transition-smooth);
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
+}
+
+/* ============================================
+   6. BUTTON STYLES - MODERN
+   ============================================ */
+button, .btn {
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: var(--accent-blue);
+    color: var(--text-white);
+    padding: 10px 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    background: var(--accent-blue-dark);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: var(--bg-lighter);
+    color: var(--text-dark);
+    padding: 10px 20px;
+    border: 1px solid var(--border-light);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-lightest);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--accent-blue);
+    padding: 10px 20px;
+    border: 1px solid var(--accent-blue);
+}
+
+.btn-outline:hover {
+    background: var(--accent-blue-light);
+}
+
+.btn-danger {
+    background: var(--accent-red);
+    color: var(--text-white);
+    padding: 10px 20px;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   7. TABLE STYLES - MODERN
+   ============================================ */
+.table-modern {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+}
+
+.table-modern thead {
+    background: var(--bg-lighter);
+    border-bottom: 2px solid var(--border-light);
+}
+
+.table-modern th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-medium);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table-modern tbody tr {
+    border-bottom: 1px solid var(--border-lighter);
+    transition: background-color var(--transition-fast);
+}
+
+.table-modern tbody tr:hover {
+    background: var(--bg-lightest);
+}
+
+.table-modern td {
+    padding: 12px 16px;
+    color: var(--text-dark);
+}
+
+/* Backward compatibility */
+.table-cream {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+}
+
+.table-cream thead {
+    background: var(--bg-lighter);
+}
+
+.table-cream th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-medium);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.table-cream tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.table-cream tbody tr:nth-child(odd) {
+    background: rgba(248, 249, 250, 0.5);
+}
+
+.table-cream tbody tr:hover {
+    background: rgba(240, 242, 245, 0.8);
+}
+
+.table-cream td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-dark);
+}
+
+/* ============================================
+   7.5 FORM STYLES - MODERN
+   ============================================ */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--white);
+    color: var(--text-dark);
+    transition: all var(--transition-smooth);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: var(--white);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 14px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+/* ============================================
+   8. ANIMATIONS
+   ============================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.fade-in-stagger-1 { animation: fadeIn 0.5s ease-out 0.1s forwards; opacity: 0; }
+.fade-in-stagger-2 { animation: fadeIn 0.5s ease-out 0.2s forwards; opacity: 0; }
+.fade-in-stagger-3 { animation: fadeIn 0.5s ease-out 0.3s forwards; opacity: 0; }
+.fade-in-stagger-4 { animation: fadeIn 0.5s ease-out 0.4s forwards; opacity: 0; }
+
+.skeleton-loader {
+    background: linear-gradient(90deg, #f0f2f5 25%, #e8eaed 50%, #f0f2f5 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    border-radius: 8px;
+}
+
+/* ============================================
+   9. CHART CONTAINER STYLES
+   ============================================ */
+.chart-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-xs);
+    transition: all var(--transition-smooth);
+}
+
+.chart-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.chart-container {
+    position: relative;
+    height: 350px;
+    width: 100%;
+}
+
+/* ============================================
+   10. UTILITY CLASSES
+   ============================================ */
+.text-dark { color: var(--text-dark); }
+.text-medium { color: var(--text-medium); }
+.text-light { color: var(--text-light); }
+
+.bg-cream { background: var(--bg-light); }
+
+.rounded-lg { border-radius: 12px; }
+.rounded-md { border-radius: 8px; }
+
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+
+.transition-smooth { transition: all var(--transition-smooth); }
+.transition-fast { transition: all var(--transition-fast); }
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ============================================
+   11. FORM & INPUT STYLES
+   ============================================ */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-dark);
+    background: white;
+    transition: all var(--transition-smooth);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ============================================
+   12. NAVIGATION & SIDEBAR STYLES
+   ============================================ */
+.nav-link {
+    display: block;
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: var(--text-dark);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all var(--transition-smooth);
+}
+
+.nav-link:hover {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--accent-blue);
+    transform: translateX(4px);
+}
+
+.nav-link.active {
+    background: var(--accent-blue);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.sidebar-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.sidebar-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+/* ============================================
+   13. HEADER & FOOTER STYLES
+   ============================================ */
+header {
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+header h1 {
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
+footer {
+    background: white;
+    border-top: 1px solid var(--border-light);
+    padding: 20px;
+    text-align: center;
+    color: var(--text-medium);
+    font-size: 13px;
+}
+
+/* ============================================
+   14. BADGE & STATUS STYLES
+   ============================================ */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-blue {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--accent-blue);
+}
+
+.badge-orange {
+    background: rgba(249, 115, 22, 0.1);
+    color: var(--accent-orange);
+}
+
+.badge-pink {
+    background: rgba(236, 72, 153, 0.1);
+    color: var(--accent-pink);
+}
+
+.badge-green {
+    background: rgba(22, 163, 74, 0.1);
+    color: var(--accent-green);
+}
+
+.badge-red {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* ============================================
+   15. RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+    .card-cream {
+        padding: 16px;
+    }
+
+    .heading-h1 {
+        font-size: 24px;
+    }
+
+    .heading-h2 {
+        font-size: 20px;
+    }
+
+    .nav-link {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 640px) {
+    .card-cream {
+        padding: 12px;
+    }
+
+    .value-large {
+        font-size: 28px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select {
+        font-size: 16px;
+    }
+}
+.unisa-logo-footer {
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            height: 45px;
+            opacity: 0.5;
+            z-index: 1000;
+            transition: opacity 0.2s;
+        }

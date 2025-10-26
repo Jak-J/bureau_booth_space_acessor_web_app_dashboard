@@ -1,0 +1,134 @@
+
+/* ============================================
+   CUSTOM CSS FOR BUREAU BOOTHS APPLICATION
+
+   This file contains custom styling and animations
+   that enhance the user experience.
+
+   CUSTOMIZATION GUIDE:
+   - Animations: Modify @keyframes sections
+   - Colors: Update color values (hex codes)
+   - Transitions: Adjust timing and easing
+   - Hover effects: Modify transform and shadow values
+   ============================================ */
+
+/* ============================================
+   LOADING ANIMATIONS
+   ============================================ */
+/* Pulse animation - used for loading states */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.pulse {
+    /* Continuous pulsing effect for loading indicators */
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR STYLING
+   ============================================ */
+/* Customize scrollbar appearance for better UX */
+::-webkit-scrollbar {
+    width: 8px;  /* Scrollbar width */
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;  /* Track background color */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;  /* Thumb color */
+    border-radius: 4px;   /* Rounded corners */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;  /* Hover color - darker shade */
+}
+
+/* ============================================
+   SMOOTH TRANSITIONS
+   ============================================ */
+/* Apply smooth transitions to all elements */
+* {
+    transition: all 0.2s ease-in-out;  /* Adjust timing here for global animation speed */
+}
+
+/* ============================================
+   CARD HOVER EFFECTS
+   ============================================ */
+/* Enhanced hover effect for interactive cards */
+.card-hover:hover {
+    transform: translateY(-2px);  /* Lift effect on hover */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   STATUS INDICATORS
+   ============================================ */
+/* Visual indicators for online/offline status */
+.status-online {
+    position: relative;
+}
+
+.status-online::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background: #10b981;
+    border: 2px solid white;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+    .mobile-hidden {
+        display: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        background: white !important;
+    }
+}
+
+/* Dark mode support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+    /* Dark mode styles can be added here */
+}
+
+/* Accessibility improvements */
+.focus-visible:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Chart container improvements */
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
+
+/* Loading states */
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
