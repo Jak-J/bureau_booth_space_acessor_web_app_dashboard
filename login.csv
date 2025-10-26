@@ -1,0 +1,5 @@
+username,password,role,client_name
+admin,admin123,admin,
+clientA_user,passwordA,client,clientA
+clientB_user,passwordB,client,clientB
+clientC_user,passwordC,client,clientC
