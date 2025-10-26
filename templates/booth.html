@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ booth_name }} - {{ loc_name }}</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+</head>
+<body style="background: #f8f9fa; min-height: 100vh;">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 transition-opacity duration-300">
+        <div class="text-center">
+            <div class="inline-block w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+            <div class="text-white text-lg mt-4 font-medium">Loading booth data...</div>
+        </div>
+    </div>
+
+    <!-- Header - FIXED Z-INDEX HIERARCHY -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 fade-in" style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+        <div class="flex items-center justify-between px-4 py-4 lg:px-8">
+            <div class="flex items-center space-x-4">
+                <button id="mobileMenuToggle" class="lg:hidden text-gray-700 hover:text-blue-600 focus:outline-none text-2xl transition-colors duration-200" aria-label="Toggle menu">
+                    ☰
+                </button>
+                <h1 class="heading-h2"><img src="{{ url_for('static', filename='client_logo.png') }}" alt="Logo" style="width: 100px; height: 50px; object-fit:contain; display:block;"><span>🏢 Bureau Booths</span></h1>
+            </div>
+            <div class="flex items-center space-x-6">
+                <span class="hidden md:inline-block text-sm">
+                    {% if session.role == 'admin' %}
+                        <span class="badge badge-blue">Admin View</span>
+                    {% else %}
+                        <span class="text-gray-600">Client: <strong class="text-gray-800">{{ session.client_name }}</strong></span>
+                    {% endif %}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn-primary text-sm">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenuOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"></div>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar - FIXED Z-INDEX (lower than navbar) -->
+        <aside id="sidebar" class="fixed lg:sticky top-16 lg:top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 text-gray-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40 overflow-y-auto" style="box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);">
+            <div class="sidebar-section">
+                <h2 class="sidebar-title">📍 Locations</h2>
+                <ul class="space-y-1">
+                    {% for location in locations %}
+                    <li>
+                        <a href="{{ url_for('location_view', loc_name=location) }}"
+                           class="nav-link">
+                            {{ location }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 lg:p-8 overflow-x-hidden fade-in">
+            <!-- Replace this image: Add booth header image here (recommended size: 1200x300px) -->
+            <a href="{{ url_for('location_view', loc_name=loc_name) }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium mb-6 transition-colors duration-200">
+                <span class="mr-2">←</span> Back to {{ loc_name }}
+            </a>
+
+            <h2 class="heading-h2 mb-6">{{ booth_name }} - Sensor Readings</h2>
+
+            <!-- KPI Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8 fade-in-stagger-1">
+                <!-- Temperature Card -->
+                <a href="{{ url_for('analytics', loc_name=loc_name, booth_name=booth_name, metric='temp_c') }}"
+                   class="card-cream-small {% if reading.get('temp_c', 0) > thresholds.temp_c.high %}border-red{% else %}border-blue{% endif %} hover-lift">
+                    <h4 class="label-uppercase mb-2">Temperature</h4>
+                    <p class="value-large mb-1">
+                        {% if reading.get('temp_c') is not none %}{{ reading.get('temp_c') | round(1) }}<span class="text-lg text-gray-600"> °C</span>{% else %}N/A{% endif %}
+                    </p>
+                    <small class="description-text">&nbsp;</small>
+                </a>
+
+                <!-- Humidity Card -->
+                <a href="{{ url_for('analytics', loc_name=loc_name, booth_name=booth_name, metric='humidity_pct') }}"
+                   class="card-cream-small {% if reading.get('humidity_pct', 0) > thresholds.humidity_pct.high %}border-red{% else %}border-orange{% endif %} hover-lift">
+                    <h4 class="label-uppercase mb-2">Humidity</h4>
+                    <p class="value-large mb-1">
+                        {% if reading.get('humidity_pct') is not none %}{{ reading.get('humidity_pct') | round(1) }}<span class="text-lg text-gray-600"> %</span>{% else %}N/A{% endif %}
+                    </p>
+                    <small class="description-text">&nbsp;</small>
+                </a>
+
+                <!-- CO2 Card -->
+                <a href="{{ url_for('analytics', loc_name=loc_name, booth_name=booth_name, metric='co2_ppm') }}"
+                   class="card-cream-small border-green hover-lift">
+                    <h4 class="label-uppercase mb-2">CO₂ Level</h4>
+                    <p class="value-large mb-1">
+                        {% if reading.get('co2_ppm') is not none %}{{ reading.get('co2_ppm') | round(0) }}<span class="text-lg text-gray-600"> ppm</span>{% else %}N/A{% endif %}
+                    </p>
+                </a>
+
+                <!-- Light Card -->
+                <a href="{{ url_for('analytics', loc_name=loc_name, booth_name=booth_name, metric='light_lux') }}"
+                   class="card-cream-small border-pink hover-lift">
+                    <h4 class="label-uppercase mb-2">Light Intensity</h4>
+                    <p class="value-large mb-1">
+                        {% if reading.get('light_lux') is not none %}{{ reading.get('light_lux') | round(0) }}<span class="text-lg text-gray-600"> lux</span>{% else %}N/A{% endif %}
+                    </p>
+                </a>
+
+                <!-- Sound Card -->
+                <a href="{{ url_for('analytics', loc_name=loc_name, booth_name=booth_name, metric='sound_dBA') }}"
+                   class="card-cream-small border-blue hover-lift">
+                    <h4 class="label-uppercase mb-2">Sound Level</h4>
+                    <p class="value-large mb-1">
+                        {% if reading.get('sound_dBA') is not none %}{{ reading.get('sound_dBA') | round(1) }}<span class="text-lg text-gray-600"> dBA</span>{% else %}N/A{% endif %}
+                    </p>
+                </a>
+
+                <!-- Occupancy Card -->
+                <a href="{{ url_for('analytics', loc_name=loc_name, booth_name=booth_name, metric='occupancy_count') }}"
+                   class="card-cream-small border-orange hover-lift">
+                    <h4 class="label-uppercase mb-2">Occupancy Count</h4>
+                    <p class="value-large mb-1">
+                        {% if reading.get('occupancy_count') is not none %}{{ reading.get('occupancy_count') }}<span class="text-lg text-gray-600"> People</span>{% else %}N/A{% endif %}
+                    </p>
+                </a>
+
+                <!-- Occupancy Status Card -->
+                <div class="card-cream-small {% if reading.get('occupancy_status') == 'Occupied' %}border-green{% else %}border-gray{% endif %} hover-lift">
+                    <h4 class="label-uppercase mb-2">Occupancy Status</h4>
+                    <p class="value-medium {% if reading.get('occupancy_status') == 'Occupied' %}text-green-600{% else %}text-gray-600{% endif %}">
+                        {{ reading.get('occupancy_status', 'Unknown') }}
+                    </p>
+                </div>
+
+                <!-- Comfort Score Card -->
+                <div class="card-cream-small border-pink hover-lift">
+                    <h4 class="label-uppercase mb-2">Comfort Score</h4>
+                    <p class="value-large mb-1">
+                        {% if reading.get('comfort_score') is not none %}{{ reading.get('comfort_score') | round(1) }}<span class="text-lg text-gray-600"> %</span>{% else %}N/A{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Comfort Chart -->
+            {% if comfort_chart_data and comfort_chart_data.labels %}
+            <div class="chart-card border-pink hover-lift fade-in-stagger-2">
+                <h3 class="heading-h3 mb-4">Comfort Index (Last 72 Hours)</h3>
+                <div class="chart-container">
+                    <canvas id="comfortChart"></canvas>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+
+    <script>
+        {% if comfort_chart_data and comfort_chart_data.labels %}
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('comfortChart').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(147, 51, 234, 0.3)');
+            gradient.addColorStop(1, 'rgba(147, 51, 234, 0.0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ comfort_chart_data.labels|tojson }},
+                    datasets: [{
+                        label: 'Comfort Score (%)',
+                        data: {{ comfort_chart_data.values|tojson }},
+                        borderColor: 'rgb(147, 51, 234)',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: 'rgb(147, 51, 234)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        });
+        {% endif %}
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const sidebar = document.getElementById('sidebar');
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('-translate-x-full');
+                mobileMenuOverlay.classList.toggle('hidden');
+            });
+
+            mobileMenuOverlay.addEventListener('click', function() {
+                sidebar.classList.add('-translate-x-full');
+                mobileMenuOverlay.classList.add('hidden');
+            });
+        }
+
+        // Hide loading overlay
+        setTimeout(function() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }, 300);
+    </script>
+</body>
+<img src="{{ url_for('static', filename='unisa_logo.png') }}" alt="University of South Australia" class="unisa-logo-footer">
+</html>
+

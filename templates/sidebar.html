@@ -1,0 +1,10 @@
+<aside class="sidebar">
+    <div class="sidebar-section">
+        <h3 class="sidebar-title">📍 Locations</h3>
+        <ul class="space-y-1">
+            {% for loc in locations %}
+                <li><a href="{{ url_for('location_view', loc_name=loc) }}" class="nav-link">{{ loc }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</aside>

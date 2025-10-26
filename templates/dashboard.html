@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Bureau Booths</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <style>
+        /* Framer Motion Animation Utilities */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-slide-up {
+            animation: slideInUp 0.5s ease-out forwards;
+        }
+
+        .animate-slide-down {
+            animation: slideInDown 0.5s ease-out forwards;
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body style="background: #f8f9fa; min-height: 100vh;">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300">
+        <div class="text-center">
+            <div class="inline-block w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+            <div class="text-white text-lg mt-4 font-medium">Loading dashboard...</div>
+        </div>
+    </div>
+
+    <!-- Header - FIXED Z-INDEX HIERARCHY -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 fade-in" style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+        <div class="flex items-center justify-between px-4 py-4 lg:px-8">
+            <div class="flex items-center space-x-4">
+                <button id="mobileMenuToggle" class="lg:hidden text-gray-700 hover:text-blue-600 focus:outline-none text-2xl transition-colors duration-200" aria-label="Toggle menu">
+                    ☰
+                </button>
+                <h1 class="heading-h2"> 
+                    <img src="{{ url_for('static', filename='client_logo.png') }}" alt="Logo" style="width: 100px; height: 50px; object-fit:contain; display:block;"><span>Bureau Booths Dashboard</span></h1>
+            </div>
+            <div class="flex items-center space-x-6">
+                <span class="hidden md:inline-block text-sm">
+                    {% if session.role == 'admin' %}
+                        <span class="badge badge-blue">Admin View</span>
+                    {% else %}
+                        <span class="text-gray-600">Client: <strong class="text-gray-800">{{ session.client_name }}</strong></span>
+                    {% endif %}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn-primary text-sm">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenuOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"></div>
+
+    <div class="flex min-h-screen lg:pl-64">
+        <!-- Sidebar - FIXED POSITION (stays in place when scrolling) -->
+        <aside id="sidebar" class="fixed top-[72px] left-0 h-screen w-64 bg-white border-r border-gray-200 text-gray-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-40 overflow-y-auto" style="box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);">
+            <div class="sidebar-section">
+                <h2 class="sidebar-title">📍 Locations</h2>
+                <ul class="space-y-1">
+                    {% for location in locations %}
+                    <li>
+                        <a href="{{ url_for('location_view', loc_name=location) }}"
+                           class="nav-link">
+                            {{ location }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content - Adjusted for fixed sidebar on desktop -->
+        <main class="flex-1 p-4 lg:p-8 overflow-x-hidden fade-in">
+            <h1 class="heading-h1 mb-6">
+                📊 Bureau Booths Dashboard</h1>
+
+            {% if portfolio_kpis %}
+            <!-- KPI Cards Grid - Modern Light Theme -->
+            <!-- COLOR CODES REFERENCE:
+                 To change KPI card colors, modify the border-left-color values below:
+                 - Blue: #3b82f6 (Primary color)
+                 - Orange: #f97316 (Secondary color)
+                 - Pink: #ec4899 (Accent color)
+                 - Green: #10b981 (Success color)
+                 - Purple: #8b5cf6 (Highlight color)
+                 - Teal: #14b8a6 (Tertiary color)
+
+                 To change all KPI card colors globally, edit static/css/theme.css
+            -->
+            <style>
+                .kpi-card {
+                    background: #ffffff;
+                    border-left: 5px solid;
+                    border-radius: 12px;
+                    padding: 24px;
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 16px;
+                    border: 1px solid #e5e7eb;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: visible;
+                }
+
+                .kpi-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.3), transparent);
+                    pointer-events: none;
+                }
+
+                .kpi-card:hover {
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    transform: translateY(-2px);
+                    border-color: #d1d5db;
+                }
+
+                /* KPI Card Color Definitions - Edit these hex codes to change colors */
+                .kpi-card.blue {
+                    border-left-color: #3b82f6; /* Blue - Change this hex code to customize */
+                }
+
+                .kpi-card.orange {
+                    border-left-color: #f97316; /* Orange - Change this hex code to customize */
+                }
+
+                .kpi-card.pink {
+                    border-left-color: #ec4899; /* Pink - Change this hex code to customize */
+                }
+
+                .kpi-card.green {
+                    border-left-color: #10b981; /* Green - Change this hex code to customize */
+                }
+
+                .kpi-card.purple {
+                    border-left-color: #8b5cf6; /* Purple - Change this hex code to customize */
+                }
+
+                .kpi-card.teal {
+                    border-left-color: #14b8a6; /* Teal - Change this hex code to customize */
+                }
+
+                .kpi-icon {
+                    font-size: 40px;
+                    flex-shrink: 0;
+                    transition: transform 0.3s ease, filter 0.3s ease;
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+                }
+
+                .kpi-card:hover .kpi-icon {
+                    transform: scale(1.1) rotate(5deg);
+                    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+                }
+
+                .kpi-content {
+                    flex: 1;
+                    position: relative;
+                    z-index: 1;
+                }
+
+                .kpi-label {
+                    font-size: 12px;
+                    font-weight: 600;
+                    letter-spacing: 0.5px;
+                    color: #4b5563;
+                    text-transform: uppercase;
+                    margin-bottom: 8px;
+                }
+
+                .kpi-value {
+                    font-size: 32px;
+                    font-weight: 700;
+                    color: #111827;
+                    margin-bottom: 4px;
+                }
+
+                .kpi-description {
+                    font-size: 13px;
+                    color: #9ca3af;
+                    font-weight: 500;
+                }
+
+                .kpi-tooltip {
+                    position: absolute;
+                    left: 50%;
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(8px);
+                    border: 1px solid rgba(229, 231, 235, 0.8);
+                    border-radius: 10px;
+                    padding: 14px 16px;
+                    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+                    opacity: 0;
+                    visibility: hidden;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    z-index: 60;
+                    white-space: normal;
+                    max-width: 280px;
+                    font-size: 12px;
+                    color: #374151;
+                    font-weight: 500;
+                    line-height: 1.5;
+                    pointer-events: none;
+                    /* Default: tooltip above the card */
+                    bottom: 100%;
+                    transform: translateX(-50%) translateY(8px);
+                    margin-bottom: 12px;
+                    margin-top: 0;
+                }
+
+                /* When tooltip needs to be below (for top row cards) */
+                .kpi-tooltip.tooltip-below {
+                    bottom: auto;
+                    top: 100%;
+                    transform: translateX(-50%) translateY(-8px);
+                    margin-bottom: 0;
+                    margin-top: 12px;
+                }
+
+                .kpi-card:hover .kpi-tooltip {
+                    opacity: 1;
+                    visibility: visible;
+                    transform: translateX(-50%) translateY(0);
+                }
+
+                /* Arrow pointer - above position (default) */
+                .kpi-tooltip::after {
+                    content: '';
+                    position: absolute;
+                    top: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 0;
+                    height: 0;
+                    border-left: 6px solid transparent;
+                    border-right: 6px solid transparent;
+                    border-top: 6px solid rgba(255, 255, 255, 0.95);
+                }
+
+                /* Arrow pointer - below position */
+                .kpi-tooltip.tooltip-below::after {
+                    top: auto;
+                    bottom: 100%;
+                    border-top: none;
+                    border-bottom: 6px solid rgba(255, 255, 255, 0.95);
+                }
+
+                .kpi-tooltip-title {
+                    font-weight: 600;
+                    color: #1f2937;
+                    margin-bottom: 6px;
+                    display: block;
+                }
+
+                .kpi-tooltip-content {
+                    color: #6b7280;
+                    font-size: 11px;
+                    line-height: 1.6;
+                }
+
+                /* Ensure KPI grid allows tooltips to overflow */
+                .kpi-grid {
+                    overflow: visible !important;
+                    position: relative;
+                    z-index: 1;
+                }
+
+                /* Ensure main content area allows overflow for tooltips */
+                main {
+                    overflow: visible !important;
+                    position: relative;
+                    z-index: 1;
+                }
+            </style>
+
+            <div class="kpi-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Booths Card -->
+                <div class="kpi-card blue group">
+                    <div class="kpi-icon">🏢</div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Total Booths</div>
+                        <div class="kpi-value">{{ portfolio_kpis.total_booths }}</div>
+                        <div class="kpi-description">Across all locations</div>
+                    </div>
+                    <div class="kpi-tooltip">
+                        <span class="kpi-tooltip-title">Booth Breakdown by Location</span>
+                        <div class="kpi-tooltip-content">
+                            {% for location, count in portfolio_kpis.booth_breakdown.items() %}
+                                <div>{{ location }}: <strong>{{ count }}</strong> booth{{ 's' if count != 1 else '' }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Currently Occupied Card -->
+                {% set occupancy_rate = (portfolio_kpis.currently_occupied / portfolio_kpis.total_booths * 100) if portfolio_kpis.total_booths > 0 else 0 %}
+                {% if occupancy_rate >= 70 %}
+                    {% set occupancy_status = 'High Utilization' %}
+                {% elif occupancy_rate >= 40 %}
+                    {% set occupancy_status = 'Moderate Use' %}
+                {% else %}
+                    {% set occupancy_status = 'Low Utilization' %}
+                {% endif %}
+
+                <div class="kpi-card orange group">
+                    <div class="kpi-icon">👥</div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Currently Occupied</div>
+                        <div class="kpi-value">{{ portfolio_kpis.currently_occupied }}</div>
+                        <div class="kpi-description">{{ occupancy_status }} ({{ occupancy_rate | round(0) }}%)</div>
+                    </div>
+                    {% if portfolio_kpis.occupied_breakdown %}
+                    <div class="kpi-tooltip">
+                        <span class="kpi-tooltip-title">Occupancy by Location</span>
+                        <div class="kpi-tooltip-content">
+                            {% for location, count in portfolio_kpis.occupied_breakdown.items() %}
+                                <div>{{ location }}: <strong>{{ count }}</strong> occupied</div>
+                            {% endfor %}
+                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(229, 231, 235, 0.5);">
+                                <strong>Occupancy Rate:</strong> {{ occupancy_rate | round(1) }}%
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Average Time Utilization Card -->
+                {% set util_rate = portfolio_kpis.average_utilization | round(1) %}
+                {% if util_rate >= 70 %}
+                    {% set util_status = 'Excellent' %}
+                {% elif util_rate >= 50 %}
+                    {% set util_status = 'Good' %}
+                {% elif util_rate >= 30 %}
+                    {% set util_status = 'Fair' %}
+                {% else %}
+                    {% set util_status = 'Low' %}
+                {% endif %}
+
+                <div class="kpi-card pink group">
+                    <div class="kpi-icon">⏱️</div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Avg Time Utilization</div>
+                        <div class="kpi-value">{{ util_rate }}%</div>
+                        <div class="kpi-description">{{ util_status }} Performance</div>
+                    </div>
+                    <div class="kpi-tooltip">
+                        <span class="kpi-tooltip-title">Utilization Metrics</span>
+                        <div class="kpi-tooltip-content">
+                            <div><strong>Current Rate:</strong> {{ util_rate }}%</div>
+                            <div><strong>Status:</strong> {{ util_status }}</div>
+                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(229, 231, 235, 0.5);">
+                                <div>📊 Excellent: ≥70%</div>
+                                <div>📈 Good: 50-70%</div>
+                                <div>📉 Fair: 30-50%</div>
+                                <div>⚠️ Low: &lt;30%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Average Comfort Index Card -->
+                {% set comfort = avg_comfort_score | round(1) %}
+                {% if comfort >= 75 %}
+                    {% set comfort_status = 'Excellent' %}
+                {% elif comfort >= 60 %}
+                    {% set comfort_status = 'Good' %}
+                {% elif comfort >= 40 %}
+                    {% set comfort_status = 'Fair' %}
+                {% else %}
+                    {% set comfort_status = 'Needs Attention' %}
+                {% endif %}
+
+                <div class="kpi-card green group">
+                    <div class="kpi-icon">🌱</div>
+                    <div class="kpi-content">
+                        <div class="kpi-label">Avg Comfort Index</div>
+                        <div class="kpi-value">{{ comfort }}%</div>
+                        <div class="kpi-description">{{ comfort_status }}</div>
+                    </div>
+                    <div class="kpi-tooltip">
+                        <span class="kpi-tooltip-title">Comfort Score Breakdown</span>
+                        <div class="kpi-tooltip-content">
+                            <div><strong>Current Score:</strong> {{ comfort }}%</div>
+                            <div><strong>Status:</strong> {{ comfort_status }}</div>
+                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(229, 231, 235, 0.5);">
+                                <div>✨ Excellent: ≥75%</div>
+                                <div>👍 Good: 60-75%</div>
+                                <div>⚡ Fair: 40-60%</div>
+                                <div>⚠️ Needs Attention: &lt;40%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Main Dashboard Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Left Column -->
+                <div class="space-y-6">
+                    <!-- Active Alerts Panel -->
+                    <div class="card-cream border-pink hover-lift fade-in-stagger-1">
+                        <h3 class="heading-h3 mb-4 flex items-center">
+                            <span class="mr-2">🚨</span> Active Alerts
+                        </h3>
+                        {% if active_alerts %}
+                            <ul class="space-y-2">
+                            {% for alert in active_alerts %}
+                                <li class="bg-red-50 border-l-4 border-red-500 p-3 text-red-800 text-sm rounded">{{ alert }}</li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-green-600 bg-green-50 p-4 rounded-lg text-center font-medium">✅ All systems normal. No active alerts.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- System Status Panel -->
+                    <div class="card-cream border-blue hover-lift fade-in-stagger-2 overflow-x-auto">
+                        <h3 class="heading-h3 mb-4 flex items-center">
+                            <span class="mr-2">📊</span> System Status
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="table-cream">
+                                <thead>
+                                    <tr>
+                                        <th>Location</th>
+                                        <th>Booth</th>
+                                        <th>Status</th>
+                                        <th>Count</th>
+                                        <th>Comfort</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for item in system_status %}
+                                    <tr>
+                                        <td>{{ item.location }}</td>
+                                        <td>{{ item.booth }}</td>
+                                        <td>
+                                            {% if item.occupancy_status|lower == 'occupied' %}
+                                                <span class="badge badge-green">{{ item.occupancy_status }}</span>
+                                            {% elif item.occupancy_status|lower == 'vacant' %}
+                                                <span class="badge" style="background: rgba(107, 114, 128, 0.1); color: #6b7280;">{{ item.occupancy_status }}</span>
+                                            {% else %}
+                                                <span class="badge badge-red">{{ item.occupancy_status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.count }}</td>
+                                        <td>{{ item.comfort_score }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-6">
+                    <!-- Comfort Chart -->
+                    {% if comfort_chart_data and comfort_chart_data.labels and comfort_chart_data.values %}
+                    <div class="chart-card border-green hover-lift fade-in-stagger-3">
+                        <h3 class="heading-h3 mb-4">Portfolio Comfort Index (Last 72 Hours)</h3>
+                        <div class="chart-container">
+                            <canvas id="comfortIndexChart"></canvas>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Booth Performance Table (Admin Only) -->
+                    {% if session.role == 'admin' and booth_performance_data %}
+                    <div class="card-cream border-orange hover-lift fade-in-stagger-4 overflow-x-auto">
+                        <h3 class="heading-h3 mb-4">Booth Performance Overview</h3>
+                        <div class="overflow-x-auto">
+                            <table class="table-cream">
+                                <thead>
+                                    <tr>
+                                        <th>Location</th>
+                                        <th>Booth Name</th>
+                                        <th>Booth ID</th>
+                                        <th>Time Util</th>
+                                        <th>Capacity Util</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for booth in booth_performance_data %}
+                                    <tr>
+                                        <td>{{ booth.location }}</td>
+                                        <td>{{ booth.booth }}</td>
+                                        <td>{{ booth.booth_id }}</td>
+
+                                        {# Time Utilization with color coding #}
+                                        {% if booth.temporal_util < 30 %}
+                                            <td class="bg-red-100 text-red-800 font-medium">{{ booth.temporal_util | round(1) }}%</td>
+                                        {% elif booth.temporal_util < 70 %}
+                                            <td class="bg-yellow-100 text-yellow-800 font-medium">{{ booth.temporal_util | round(1) }}%</td>
+                                        {% else %}
+                                            <td class="bg-green-100 text-green-800 font-medium">{{ booth.temporal_util | round(1) }}%</td>
+                                        {% endif %}
+
+                                        {# Capacity Utilization with color coding #}
+                                        {% if booth.capacity_util < 30 %}
+                                            <td class="bg-red-100 text-red-800 font-medium">{{ booth.capacity_util | round(1) }}%</td>
+                                        {% elif booth.capacity_util < 70 %}
+                                            <td class="bg-yellow-100 text-yellow-800 font-medium">{{ booth.capacity_util | round(1) }}%</td>
+                                        {% else %}
+                                            <td class="bg-green-100 text-green-800 font-medium">{{ booth.capacity_util | round(1) }}%</td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# KPI Spotlight for Clients #}
+            {% if session.role == 'client' and spotlight_name and kpi_data.get('temp_labels') %}
+            <div class="mb-8 fade-in">
+                <h2 class="heading-h2 mb-6">🎯 KPI Spotlight: {{ spotlight_name }}</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="chart-card border-blue hover-lift">
+                        <h3 class="heading-h3 mb-4">Recent Temperature</h3>
+                        <div class="chart-container">
+                            <canvas id="tempTrendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card border-orange hover-lift">
+                        <h3 class="heading-h3 mb-4">Recent Humidity</h3>
+                        <div class="chart-container">
+                            <canvas id="humidityTrendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card border-pink hover-lift">
+                        <h3 class="heading-h3 mb-4">Recent Occupancy</h3>
+                        <div class="chart-container">
+                            <canvas id="occupancyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Plug-in Toolkit Visuals Section #}
+            {% if active_alerts or system_status %}
+            <div class="mb-8 fade-in">
+                <div class="mb-6">
+                    <h2 class="heading-h2 mb-2">Booth Performance Breakdown</h2>
+                    <p class="text-medium">Advanced analytics and insights for your booth portfolio</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Alert Distribution Chart -->
+                    {% if active_alerts %}
+                    <div class="chart-card border-red hover-lift">
+                        <h3 class="heading-h3 mb-4">🚨 Alert Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="alertDistributionChart"></canvas>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Booth Status Overview -->
+                    {% if system_status %}
+                    <div class="chart-card border-blue hover-lift">
+                        <h3 class="heading-h3 mb-4">📍 Booth Status Overview</h3>
+                        <div class="chart-container">
+                            <canvas id="boothStatusChart"></canvas>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Comfort Score Distribution -->
+                    {% if system_status %}
+                    <div class="chart-card border-orange hover-lift">
+                        <h3 class="heading-h3 mb-4">🌡️ Comfort Score Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="comfortDistributionChart"></canvas>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Location Performance Comparison -->
+                    {% if location_performance %}
+                    <div class="chart-card border-green hover-lift">
+                        <h3 class="heading-h3 mb-4">📈 Location Performance</h3>
+                        <div class="chart-container">
+                            <canvas id="locationPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </main> <!-- End of main content -->
+    </div> <!-- End of flex container -->
+    
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced Chart.js Default Configuration
+            Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+            Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            Chart.defaults.plugins.tooltip.padding = 12;
+            Chart.defaults.plugins.tooltip.cornerRadius = 8;
+            Chart.defaults.plugins.tooltip.titleFont = { size: 14, weight: 'bold' };
+            Chart.defaults.plugins.tooltip.bodyFont = { size: 13 };
+
+
+            // Global plugin: render a friendly message when a chart has no meaningful data (all zeros)
+            const NoDataTextPlugin = {
+                id: 'noDataText',
+                afterDatasetsDraw(chart, args, pluginOptions) {
+                    const datasets = (chart.data && chart.data.datasets) ? chart.data.datasets : [];
+
+                    // Check if any dataset has a value > 0
+                    let hasSignificantData = false;
+                    for (let ds of datasets) {
+                        if (Array.isArray(ds.data)) {
+                            for (let v of ds.data) {
+                                let val = 0;
+                                if (typeof v === 'number') val = v;
+                                else if (v && typeof v === 'object') {
+                                    if ('y' in v) val = Number(v.y);
+                                    else if ('x' in v) val = Number(v.x);
+                                }
+                                if (val > 0) {
+                                    hasSignificantData = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (hasSignificantData) break;
+                    }
+
+                    // If there's significant data, don't show the message
+                    if (hasSignificantData) return;
+
+                    const area = chart.chartArea;
+                    if (!area || !area.width || !area.height) return;
+
+                    const ctx = chart.ctx;
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#9ca3af'; // Tailwind gray-400
+                    ctx.font = 'bold 18px "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
+
+                    const message = (chart.options && chart.options.plugins && chart.options.plugins.noData && chart.options.plugins.noData.message)
+                        || (pluginOptions && pluginOptions.message)
+                        || 'No data available';
+
+                    ctx.fillText(message, (area.left + area.right) / 2, (area.top + area.bottom) / 2);
+                    ctx.restore();
+                }
+            };
+            if (typeof Chart !== 'undefined' && Chart.register) {
+                Chart.register(NoDataTextPlugin);
+            }
+
+            // Client KPI Spotlight Charts with Enhanced Styling
+            {% if session.role == 'client' and kpi_data and kpi_data.temp_labels %}
+                // Temperature Trend Chart
+                const tempCtx = document.getElementById('tempTrendChart').getContext('2d');
+                const tempGradient = tempCtx.createLinearGradient(0, 0, 0, 400);
+                tempGradient.addColorStop(0, 'rgba(255, 99, 132, 0.4)');
+                tempGradient.addColorStop(1, 'rgba(255, 99, 132, 0.0)');
+
+                new Chart(tempCtx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ kpi_data.temp_labels|tojson }},
+                        datasets: [{
+                            label: 'Temperature (°C)',
+                            data: {{ kpi_data.temp_values|tojson }},
+                            borderColor: '#ff6384',
+                            backgroundColor: tempGradient,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#ff6384',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            tooltip: { mode: 'index', intersect: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                                ticks: { callback: function(value) { return value + '°C'; } }
+                            },
+                            x: { grid: { display: false } }
+                        },
+                        animation: { duration: 1500, easing: 'easeInOutQuart' }
+                    }
+                });
+
+                // Humidity Trend Chart
+                const humCtx = document.getElementById('humidityTrendChart').getContext('2d');
+                const humGradient = humCtx.createLinearGradient(0, 0, 0, 400);
+                humGradient.addColorStop(0, 'rgba(54, 162, 235, 0.4)');
+                humGradient.addColorStop(1, 'rgba(54, 162, 235, 0.0)');
+
+                new Chart(humCtx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ kpi_data.temp_labels|tojson }},
+                        datasets: [{
+                            label: 'Humidity (%)',
+                            data: {{ kpi_data.humidity_values|tojson }},
+                            borderColor: '#36a2eb',
+                            backgroundColor: humGradient,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#36a2eb',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            tooltip: { mode: 'index', intersect: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                                ticks: { callback: function(value) { return value + '%'; } }
+                            },
+                            x: { grid: { display: false } }
+                        },
+                        animation: { duration: 1500, easing: 'easeInOutQuart' }
+                    }
+                });
+
+                // Occupancy Doughnut Chart
+                new Chart(document.getElementById('occupancyChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Occupied', 'Vacant'],
+                        datasets: [{
+                            data: [{{ kpi_data.occupancy_counts.get('Occupied', 0) }}, {{ kpi_data.occupancy_counts.get('Vacant', 0) }}],
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.8)',
+                                'rgba(201, 203, 207, 0.5)'
+                            ],
+                            borderColor: [
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(201, 203, 207, 1)'
+                            ],
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 15, font: { size: 13 } } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return label + ': ' + value + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        },
+                        animation: { animateRotate: true, animateScale: true, duration: 1500 }
+                    }
+                });
+            {% endif %}
+
+            // Admin Comfort Index Chart with Enhanced Styling
+            {% if comfort_chart_data and comfort_chart_data.labels %}
+            try {
+                const comfortCtx = document.getElementById('comfortIndexChart').getContext('2d');
+                const comfortGradient = comfortCtx.createLinearGradient(0, 0, 0, 400);
+                comfortGradient.addColorStop(0, 'rgba(111, 66, 193, 0.3)');
+                comfortGradient.addColorStop(1, 'rgba(111, 66, 193, 0.0)');
+
+                new Chart(comfortCtx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ comfort_chart_data['labels'] | tojson }},
+                        datasets: [{
+                            label: 'Comfort Index',
+                            data:  {{ comfort_chart_data['values'] | tojson }},
+                            borderColor: '#6f42c1',
+                            backgroundColor: comfortGradient,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#6f42c1',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Comfort: ' + context.parsed.y.toFixed(1) + '%';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                                ticks: { callback: function(value) { return value + '%'; } },
+                                title: { display: true, text: 'Comfort Score (0-100)', font: { size: 13, weight: 'bold' } }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { maxRotation: 45, minRotation: 45 }
+                            }
+                        },
+                        animation: { duration: 1500, easing: 'easeInOutQuart' }
+                    }
+                });
+            } catch (e) {
+                console.error("Error drawing admin comfort chart:", e);
+            }
+            {% endif %}
+
+            // Plug-in Toolkit Visuals Charts
+            {% if active_alerts or system_status %}
+
+                // Alert Distribution Chart
+                {% if active_alerts %}
+                const alertTypes = {
+                    'CO₂': 0,
+                    'Temperature': 0,
+                    'Other': 0
+                };
+
+                const alerts = [
+                    {% for alert in active_alerts %}
+                        "{{ alert }}"{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ];
+
+                alerts.forEach(alertText => {
+                    if (alertText.includes('CO₂')) alertTypes['CO₂']++;
+                    else if (alertText.includes('Temp')) alertTypes['Temperature']++;
+                    else alertTypes['Other']++;
+                });
+
+                new Chart(document.getElementById('alertDistributionChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(alertTypes),
+                        datasets: [{
+                            label: 'Number of Alerts',
+                            data: Object.values(alertTypes),
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(255, 159, 64, 0.7)',
+                                'rgba(255, 205, 86, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgb(255, 99, 132)',
+                                'rgb(255, 159, 64)',
+                                'rgb(255, 205, 86)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y + ' alert(s)';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 },
+                                grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                            },
+                            x: { grid: { display: false } }
+                        },
+                        animation: { duration: 1200, easing: 'easeOutBounce' }
+                    }
+                });
+                {% endif %}
+
+                // Booth Status Overview Chart
+                {% if system_status %}
+                const statusCounts = {
+                    'Occupied': 0,
+                    'Vacant': 0,
+                    'Offline': 0
+                };
+
+                const boothStatuses = [
+                    {% for booth in system_status %}
+                        "{{ booth.occupancy_status }}"{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ];
+
+                boothStatuses.forEach(status => {
+                    if (status === 'Occupied') statusCounts['Occupied']++;
+                    else if (status === 'Vacant') statusCounts['Vacant']++;
+                    else statusCounts['Offline']++;
+                });
+
+                new Chart(document.getElementById('boothStatusChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(statusCounts),
+                        datasets: [{
+                            data: Object.values(statusCounts),
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.8)',
+                                'rgba(54, 162, 235, 0.8)',
+                                'rgba(255, 99, 132, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgb(75, 192, 192)',
+                                'rgb(54, 162, 235)',
+                                'rgb(255, 99, 132)'
+                            ],
+                            borderWidth: 2,
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 15 } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                        return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        },
+                        animation: { animateRotate: true, duration: 1500 }
+                    }
+                });
+
+                // Comfort Score Distribution Chart
+                const comfortScores = [];
+                {% for booth in system_status %}
+                    {% if booth.comfort_score %}
+                        comfortScores.push({{ booth.comfort_score }});
+                    {% endif %}
+                {% endfor %}
+
+                // Create histogram bins
+                const bins = [0, 25, 50, 75, 100];
+                const binCounts = [0, 0, 0, 0];
+                const binLabels = ['0-25%', '25-50%', '50-75%', '75-100%'];
+
+                comfortScores.forEach(score => {
+                    if (score <= 25) binCounts[0]++;
+                    else if (score <= 50) binCounts[1]++;
+                    else if (score <= 75) binCounts[2]++;
+                    else binCounts[3]++;
+                });
+
+                new Chart(document.getElementById('comfortDistributionChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: binLabels,
+                        datasets: [{
+                            label: 'Number of Booths',
+                            data: binCounts,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(255, 159, 64, 0.7)',
+                                'rgba(255, 205, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgb(255, 99, 132)',
+                                'rgb(255, 159, 64)',
+                                'rgb(255, 205, 86)',
+                                'rgb(75, 192, 192)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y + ' booth(s)';
+                                    }
+                                }
+                            },
+                            noData: { message: 'No comfort score data' }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 },
+                                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                                title: { display: true, text: 'Number of Booths' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                title: { display: true, text: 'Comfort Score Range' }
+                            }
+                        },
+                        animation: { duration: 1200, easing: 'easeOutQuart' }
+                    }
+                });
+                {% endif %}
+
+                // Location Performance Chart (Averages per location)
+                {% if location_performance %}
+                try {
+                    const locationNames = {{ locations | tojson }};
+                    const perf = {{ location_performance | tojson }};
+                    const avgTime = locationNames.map(loc => (perf[loc] && perf[loc].time) ? Number(perf[loc].time) : 0);
+                    const avgCapacity = locationNames.map(loc => (perf[loc] && perf[loc].capacity) ? Number(perf[loc].capacity) : 0);
+
+                    new Chart(document.getElementById('locationPerformanceChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: locationNames,
+                            datasets: [
+                                {
+                                    label: 'Time Utilization %',
+                                    data: avgTime,
+                                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                    borderColor: 'rgb(59, 130, 246)',
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: 'Capacity Utilization %',
+                                    data: avgCapacity,
+                                    backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                                    borderColor: 'rgb(16, 185, 129)',
+                                    borderWidth: 2
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { display: true, position: 'top' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y ?? ctx.parsed.x}%`
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100,
+                                    ticks: { callback: (v) => v + '%' },
+                                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                                },
+                                x: { grid: { display: false } }
+                            },
+                            animation: { duration: 800, easing: 'easeOutQuart' }
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error drawing location performance chart:', e);
+                }
+                {% endif %}
+
+            {% endif %}
+
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+            const sidebar = document.getElementById('sidebar');
+
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('-translate-x-full');
+                    mobileMenuOverlay.classList.toggle('hidden');
+                });
+
+                mobileMenuOverlay.addEventListener('click', function() {
+                    sidebar.classList.add('-translate-x-full');
+                    mobileMenuOverlay.classList.add('hidden');
+                });
+            }
+
+            // Hide loading overlay
+            setTimeout(function() {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 500);
+
+            // Smart tooltip positioning - detect if tooltip would overlap header
+            function adjustTooltipPosition() {
+                const kpiCards = document.querySelectorAll('.kpi-card');
+                const headerHeight = 72; // Approximate header height in pixels
+                const minSpaceAbove = 20; // Minimum space needed above tooltip
+
+                kpiCards.forEach(card => {
+                    const tooltip = card.querySelector('.kpi-tooltip');
+                    if (!tooltip) return;
+
+                    // Get the card's position relative to viewport
+                    const cardRect = card.getBoundingClientRect();
+                    const tooltipHeight = tooltip.offsetHeight;
+
+                    // Calculate where the tooltip would be if positioned above
+                    const tooltipTopIfAbove = cardRect.top - tooltipHeight - 12; // 12px margin
+
+                    // If tooltip would go above the header, position it below instead
+                    if (tooltipTopIfAbove < headerHeight + minSpaceAbove) {
+                        tooltip.classList.add('tooltip-below');
+                    } else {
+                        tooltip.classList.remove('tooltip-below');
+                    }
+                });
+            }
+
+            // Run on page load and on window resize
+            window.addEventListener('load', adjustTooltipPosition);
+            window.addEventListener('resize', adjustTooltipPosition);
+
+            // Also adjust when hovering over cards (in case layout changed)
+            document.querySelectorAll('.kpi-card').forEach(card => {
+                card.addEventListener('mouseenter', adjustTooltipPosition);
+            });
+        });
+
+        // Auto-refresh every 60 seconds
+        setTimeout(function(){ location.reload(); }, 60000);
+    </script>
+</body>
+<img src="{{ url_for('static', filename='unisa_logo.png') }}" alt="University of South Australia" class="unisa-logo-footer">
+</html>
+
