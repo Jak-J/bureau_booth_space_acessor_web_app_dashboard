@@ -1,0 +1,7 @@
+client_name,location,booth,booth_id,max_occupancy
+clientA,Adelaide,Booth A,ADEL-001,4
+clientA,Adelaide,Booth B,ADEL-002,2
+clientB,Melbourne,Booth A,MELB-001,2
+clientB,Melbourne,Booth B,MELB-002,4
+clientC,Sydney,Booth A,SDNY-001,2
+clientC,Sydney,Booth B,SDNT-002,4
